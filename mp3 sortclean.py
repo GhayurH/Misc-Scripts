@@ -15,9 +15,9 @@ def delete_mp3_files(directory, min_length=None, max_length=None, delete_contain
                     length_ms = int(float(duration_info) * 1000)
                     
                     # Check if the file meets deletion criteria
-                    if ((min_length is not None and length_ms < min_length) or 
-                        (max_length is not None and length_ms > max_length) or 
-                        (delete_contains and any(substring.lower() in file.lower() for substring in delete_contains))):
+                    if (min_length is not None and length_ms < min_length) or \
+                       (max_length is not None and length_ms > max_length) or \
+                       (delete_contains and any(substring.lower() in file.lower() for substring in delete_contains)):
                         
                         # Delete the file
                         os.remove(file_path)

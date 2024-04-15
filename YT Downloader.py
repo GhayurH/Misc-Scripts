@@ -4,7 +4,7 @@ import re
 from yt_dlp import YoutubeDL
 
 destination_folder = "c:/a"
-downloaded_videos_file = r'C:\Users\Ghayur Haider\Desktop\AZ\Git\Slides-Lyrics-Salah_times\Misc. Scripts\downloaded_videos.txt'
+downloaded_videos_file = r'C:\Users\Ghayur Haider\Desktop\AZ\Git\Misc-Scripts\downloaded_videos.txt'
 skip_keywords = ["interview", "trailer", "promo", "teaser"]  # Keywords to skip downloads for
 
 # Function to load downloaded video URLs from a text file
@@ -27,8 +27,7 @@ def get_video_title(url):
   try:
     with YoutubeDL({'skip_download': True}) as ydl:
       info_dict = ydl.extract_info(url, download=False)
-      video_title = info_dict.get('title', None)
-      return video_title
+      return info_dict.get('title', None)
   except Exception as e:
     print(f"Error getting video title: {e}")
     return None
@@ -52,7 +51,6 @@ def extract_video_urls(url):
                     download_and_convert(a)
     else:
         print(f"Error extracting video URLs from {url}")
-        return []
 
 # Function to check if a video has already been downloaded or should be skipped
 def is_video_skipped_or_downloaded(url):
