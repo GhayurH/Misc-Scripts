@@ -3,7 +3,7 @@ import subprocess
 import re
 from yt_dlp import YoutubeDL
 
-destination_folder = "c:/a"
+destination_folder = r'C:\a'
 downloaded_videos_file = r'C:\Users\Ghayur Haider\Desktop\AZ\Git\Misc-Scripts\downloaded_videos.txt'
 skip_keywords = ["interview", "trailer", "promo", "teaser"]  # Keywords to skip downloads for
 
