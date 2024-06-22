@@ -14,7 +14,7 @@ def remove_duplicates(input_file, output_file):
         out_file.write(line)
 
 # Example usage
-input_file = "C:/a/junk/downloaded_videos.txt"
-output_file = "C:/a/junk/downloaded_videos2.txt"
+input_file = r'C:\a\downloaded_videos.txt'
+output_file = r'C:\a\downloaded_videos3.txt'
 remove_duplicates(input_file, output_file)
 print(f"Duplicate lines removed and saved to {output_file}")
