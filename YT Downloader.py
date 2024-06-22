@@ -107,22 +107,22 @@ if __name__ == "__main__":
         
         # List of YouTube URLs (channels, playlists, or videos)
         urls = [
-            "https://www.youtube.com/c/SyedNadeemSarwar/",
-            "https://www.youtube.com/channel/UCaM-L3ytlAtk5_Wg3HIUvIw", # Kazmi Brothers
-            "https://www.youtube.com/channel/UC_qRtpijKZ-iipmWYCndLrA", # Mir Hasan
-            "https://www.youtube.com/c/MAKOfficial",
-            "https://www.youtube.com/c/ShadmanRazaNaqviOfficial", 
-            "https://www.youtube.com/c/AmeerHasanAamir",
-            "https://www.youtube.com/c/ShahidBaltistaniOfficial",
-            "https://www.youtube.com/c/MesumAbbasOfficial",
-            "https://www.youtube.com/c/syedrazaabbaszaidi/",
-            "https://www.youtube.com/c/AhmedRazaNasiriOfficial",
-            "https://www.youtube.com/@pentapure4356/",
-            "https://www.youtube.com/@Azadar110",
-            "https://www.youtube.com/@chakwalpartyofficial",
-            "https://www.youtube.com/@hyderrizvi6524",
-            "https://www.youtube.com/@NazimPartyOfficial",
-            "https://www.youtube.com/@soazkhuwani6163"
+            "https://www.youtube.com/@SyedNadeemSarwar/videos",
+            "https://www.youtube.com/@kazmibrothers1107/videos",
+            "https://www.youtube.com/@MirHasanMir/videos",
+            "https://www.youtube.com/@MAKOfficial/videos",
+            "https://www.youtube.com/@ShadmanRazaofficial/videos", 
+            "https://www.youtube.com/@AmeerHasanAamir/videos",
+            "https://www.youtube.com/@ShahidBaltistaniOfficial/videos",
+            "https://www.youtube.com/@MesumAbbas/videos",
+            "https://www.youtube.com/@syedrazaabbaszaidi/videos",
+            "https://www.youtube.com/@AhmedRazaNasiriOfficial/videos",
+            "https://www.youtube.com/@pentapure4356/videos",
+            "https://www.youtube.com/@Azadar110/videos",
+            "https://www.youtube.com/@chakwalpartyofficial/videos",
+            "https://www.youtube.com/@hyderrizvi6524/videos",
+            "https://www.youtube.com/@NazimPartyOfficial/videos",
+            "https://www.youtube.com/@soazkhuwani6163/videos"
         ]
         
         # Start processing
