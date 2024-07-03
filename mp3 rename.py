@@ -2,7 +2,7 @@ import os
 import re
 
 # Replace 'directory_path' with the path of your directory
-directory_path = r'C:\Audio'
+directory_path = r'C:\a'
 log_file_path = os.path.join(directory_path, 'name_changes_log.txt')
 
 def rename_and_clean_files(directory):

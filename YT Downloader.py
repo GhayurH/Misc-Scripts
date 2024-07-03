@@ -5,7 +5,7 @@ import concurrent.futures
 
 destination_folder = r'C:\a'
 downloaded_videos_file = r'C:\Users\Ghayur Haider\Desktop\AZ\Git\Misc-Scripts\downloaded_videos.txt'
-log_file = r'C:\Users\Ghayur Haider\Desktop\AZ\Git\Misc-Scripts\download_log.txt'
+log_file = r'C:\a\download_log.txt'
 skip_keywords = ["interview", "trailer", "promo", "teaser"]  # Keywords to skip downloads for
 
 # Function to load downloaded video URLs from a text file
