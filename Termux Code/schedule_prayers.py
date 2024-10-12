@@ -10,17 +10,34 @@ logging.basicConfig(filename='prayer_schedule.log', level=logging.DEBUG)
 # Get the full path to termux-notification
 termux_notification_path = os.popen('which termux-notification').read().strip()
 
-# Convert time (hh:mm:ss) to cron time format (minute, hour)
-def time_to_cron(time_str):
-    time_obj = parse_time_string(time_str)
-    return time_obj.minute, time_obj.hour
+# Function to parse date strings
+def parse_date_string(date_str):
+    date_str = date_str.strip()
+    if not date_str:
+        raise ValueError("Empty date string")
+    date_formats = ["%Y-%m-%d %H:%M", "%Y-%m-%d"]
+    for fmt in date_formats:
+        try:
+            return datetime.strptime(date_str, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError(f"Date '{date_str}' is not in a recognized format.")
 
-# Function to remove existing prayer-related cron jobs before adding new ones
-def remove_old_prayer_cron_jobs():
-    subprocess.run('(crontab -l | grep -v "termux-notification --id") | crontab -', shell=True)
+# Function to parse time strings
+def parse_time_string(time_str):
+    time_str = time_str.strip()
+    if not time_str:
+        raise ValueError("Empty time string")
+    time_formats = ["%H:%M:%S", "%H:%M"]
+    for fmt in time_formats:
+        try:
+            return datetime.strptime(time_str, fmt).time()
+        except ValueError:
+            continue
+    raise ValueError(f"Time '{time_str}' is not in a recognized format.")
 
-# Function to create a cron job for a given time and message
-def create_cron_job(minute, hour, day, month, message, notification_id):
+# Function to create a cron job line
+def create_cron_job_line(minute, hour, day, month, message, notification_id):
     cron_time = f"{minute} {hour} {day} {month} *"
     cron_command = (
         f'{termux_notification_path} --id {notification_id} '
@@ -28,33 +45,39 @@ def create_cron_job(minute, hour, day, month, message, notification_id):
         f'>> /storage/emulated/0/termux_cron.log 2>&1'
     )
     cron_job = f'{cron_time} {cron_command}'
-
-    subprocess.run(f'(crontab -l ; echo "{cron_job}") | crontab -', shell=True)
-
-# Function to parse time strings
-def parse_time_string(time_str):
-    if len(time_str.strip()) == 0:
-        raise ValueError("Empty time string")
-    if len(time_str.split(":")) == 2:
-        time_str += ":00"
-    return datetime.strptime(time_str, "%H:%M:%S")
+    return cron_job
 
 # Read the CSV and schedule notifications for Fajr, Dhuhr, and Maghrib
 def schedule_prayer_notifications(csv_file):
     try:
-        remove_old_prayer_cron_jobs()  # Clean up old cron jobs first
-
-        today = datetime.now()
+        today = datetime.now().date()
         end_date = today + timedelta(days=30)
+
+        # Read existing crontab
+        result = subprocess.run(['crontab', '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode != 0:
+            current_crontab = ''
+        else:
+            current_crontab = result.stdout
+
+        # Remove old prayer-related cron jobs
+        new_crontab_lines = [
+            line for line in current_crontab.split('\n')
+            if 'termux-notification --id' not in line
+        ]
 
         with open(csv_file, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 date_str = row['Date']
-                date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+                try:
+                    date_obj = parse_date_string(date_str)
+                except ValueError as e:
+                    logging.error(f"Skipping row due to date parsing error: {e}")
+                    continue
 
                 # Ignore past dates
-                if date_obj.date() < today.date():
+                if date_obj < today:
                     continue
 
                 # Schedule notifications only for the next 30 days
@@ -65,29 +88,78 @@ def schedule_prayer_notifications(csv_file):
                 month = date_obj.month
 
                 # Fajr
-                fajr_time = parse_time_string(row['Fajr'])
-                fajr_datetime = datetime.combine(date_obj.date(), fajr_time.time())
-                fajr_before = fajr_datetime - timedelta(minutes=10)
-                create_cron_job(fajr_before.minute, fajr_before.hour, day, month, "10 minutes to Fajr", 1)
-                create_cron_job(fajr_time.minute, fajr_time.hour, day, month, "It's time for Fajr", 1)
+                try:
+                    fajr_time = parse_time_string(row['Fajr'])
+                    fajr_datetime = datetime.combine(date_obj, fajr_time)
+                    fajr_before = fajr_datetime - timedelta(minutes=10)
+                    new_crontab_lines.append(
+                        create_cron_job_line(
+                            fajr_before.minute, fajr_before.hour, day, month,
+                            "10 minutes to Fajr", 1
+                        )
+                    )
+                    new_crontab_lines.append(
+                        create_cron_job_line(
+                            fajr_time.minute, fajr_time.hour, day, month,
+                            "It's time for Fajr", 1
+                        )
+                    )
+                except Exception as e:
+                    logging.error(f"Error scheduling Fajr for {date_str}: {e}")
 
                 # Dhuhr
-                dhuhr_time = parse_time_string(row['Dhuhr'])
-                dhuhr_datetime = datetime.combine(date_obj.date(), dhuhr_time.time())
-                dhuhr_before = dhuhr_datetime - timedelta(minutes=10)
-                create_cron_job(dhuhr_before.minute, dhuhr_before.hour, day, month, "10 minutes to Dhuhr", 2)
-                create_cron_job(dhuhr_time.minute, dhuhr_time.hour, day, month, "It's time for Dhuhr", 2)
+                try:
+                    dhuhr_time = parse_time_string(row['Dhuhr'])
+                    dhuhr_datetime = datetime.combine(date_obj, dhuhr_time)
+                    dhuhr_before = dhuhr_datetime - timedelta(minutes=10)
+                    new_crontab_lines.append(
+                        create_cron_job_line(
+                            dhuhr_before.minute, dhuhr_before.hour, day, month,
+                            "10 minutes to Dhuhr", 2
+                        )
+                    )
+                    new_crontab_lines.append(
+                        create_cron_job_line(
+                            dhuhr_time.minute, dhuhr_time.hour, day, month,
+                            "It's time for Dhuhr", 2
+                        )
+                    )
+                except Exception as e:
+                    logging.error(f"Error scheduling Dhuhr for {date_str}: {e}")
 
                 # Maghrib
-                maghrib_time = parse_time_string(row['Maghrib'])
-                maghrib_datetime = datetime.combine(date_obj.date(), maghrib_time.time())
-                maghrib_before = maghrib_datetime - timedelta(minutes=10)
-                create_cron_job(maghrib_before.minute, maghrib_before.hour, day, month, "10 minutes to Maghrib", 3)
-                create_cron_job(maghrib_time.minute, maghrib_time.hour, day, month, "It's time for Maghrib", 3)
+                try:
+                    maghrib_time = parse_time_string(row['Maghrib'])
+                    maghrib_datetime = datetime.combine(date_obj, maghrib_time)
+                    maghrib_before = maghrib_datetime - timedelta(minutes=10)
+                    new_crontab_lines.append(
+                        create_cron_job_line(
+                            maghrib_before.minute, maghrib_before.hour, day, month,
+                            "10 minutes to Maghrib", 3
+                        )
+                    )
+                    new_crontab_lines.append(
+                        create_cron_job_line(
+                            maghrib_time.minute, maghrib_time.hour, day, month,
+                            "It's time for Maghrib", 3
+                        )
+                    )
+                except Exception as e:
+                    logging.error(f"Error scheduling Maghrib for {date_str}: {e}")
 
         # Schedule reminder for the last day to re-run the script
         reminder_message = "Please re-run the prayer schedule script tonight."
-        create_cron_job(0, 9, end_date.day, end_date.month, reminder_message, 4)  # Reminder at 09:00 AM
+        new_crontab_lines.append(
+            create_cron_job_line(
+                0, 21, end_date.day, end_date.month, reminder_message, 4
+            )
+        )
+
+        # Combine all lines
+        new_crontab = '\n'.join(new_crontab_lines) + '\n'
+
+        # Set the new crontab
+        subprocess.run(['crontab', '-'], input=new_crontab, text=True)
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
