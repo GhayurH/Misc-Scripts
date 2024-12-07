@@ -1,3 +1,5 @@
 ~*
 /~*
 *.csv
+/deprecated/
+cookies.txt
