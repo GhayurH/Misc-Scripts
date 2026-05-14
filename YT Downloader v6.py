@@ -218,6 +218,29 @@ def process_downloaded_files(destination_folder, skip_keywords, remove_phrases):
             logging.info(f"Renamed {filename} to {new_name}")
 
 
+def delete_leftover_thumbnails(destination_folder):
+    """
+    Deletes leftover thumbnail files created by yt-dlp after embedding.
+    """
+
+    thumbnail_extensions = (
+        '.webp',
+        '.jpg',
+        '.jpeg',
+        '.png',
+    )
+
+    for filename in os.listdir(destination_folder):
+        full_path = os.path.join(destination_folder, filename)
+
+        if not os.path.isfile(full_path):
+            continue
+
+        if filename.lower().endswith(thumbnail_extensions):
+            os.remove(full_path)
+            logging.info(f"Deleted leftover thumbnail file: {filename}")
+
+
 def main():
     config = load_config()
 
@@ -394,6 +417,8 @@ def main():
         skip_keywords,
         remove_phrases
     )
+
+    delete_leftover_thumbnails(destination_folder)
 
     logging.info(f"Newly downloaded videos: {len(newly_downloaded)}")
     logging.info("All processing finished.")
