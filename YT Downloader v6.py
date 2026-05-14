@@ -330,6 +330,16 @@ def main():
 
     ydl_opts = {
         'format': 'bestaudio/best',
+        'outtmpl': os.path.join(destination_folder, '%(title)s [%(id)s].%(ext)s'),
+        'ignoreerrors': False,
+        'noplaylist': True,
+
+        # Download thumbnail so EmbedThumbnail has something to embed
+        'writethumbnail': True,
+
+        # Good metadata
+        'embedmetadata': True,
+
         'postprocessors': [
             {
                 'key': 'FFmpegExtractAudio',
@@ -337,12 +347,14 @@ def main():
                 'preferredquality': '192'
             },
             {
-                'key': 'EmbedThumbnail'
-            }
+                'key': 'FFmpegMetadata',
+                'add_metadata': True,
+            },
+            {
+                'key': 'EmbedThumbnail',
+                'already_have_thumbnail': False,
+            },
         ],
-        'outtmpl': os.path.join(destination_folder, '%(title)s [%(id)s].%(ext)s'),
-        'ignoreerrors': False,
-        'noplaylist': True,
     }
 
     if js_runtime and shutil.which(js_runtime):
